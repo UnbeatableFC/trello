@@ -10,11 +10,11 @@ import React from "react";
 const Dashboard = () => {
   const { user } = useUser();
 
-  const {createBoard} = useBoards()
+  const { createBoard } = useBoards();
 
   const handleCreateBoard = async () => {
-    await createBoard()
-  }
+    await createBoard({ title: "New Board" });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -30,7 +30,10 @@ const Dashboard = () => {
           <p className="text-gray-600">
             Here&apos;s what happening with your boards today
           </p>
-          <Button className="w-full sm:w-auto" onClick={handleCreateBoard}>
+          <Button
+            className="w-full sm:w-auto"
+            onClick={handleCreateBoard}
+          >
             <Plus className="size-4 mr-2" />
             Create Board
           </Button>
