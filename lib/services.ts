@@ -3,6 +3,23 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 // Board Table Services
 export const boardService = {
+  async getBoard(
+    supabase: SupabaseClient,
+    boardId: string
+  ): Promise<Board> {
+    const { data, error } = await supabase
+      .from("boards")
+      .select("*")
+      .eq("id", boardId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  },
+
   async getBoards(
     supabase: SupabaseClient,
     userId: string
@@ -40,19 +57,22 @@ export const boardService = {
 
 // Column Table Services
 export const columnService = {
-  //   async getBoards(userId: string): Promise<Board[]> {
-  //     const { data, error } = await supabase
-  //       .from("boards")
-  //       .select("*")
-  //       .eq("user_id", userId)
-  //       .order("created_at", { ascending: false });
+  async getColumns(
+    supabase: SupabaseClient,
+    boardId: string
+  ): Promise<Column[]> {
+    const { data, error } = await supabase
+      .from("columns")
+      .select("*")
+      .eq("board_id", boardId)
+      .order("sort_order", { ascending: true });
 
-  //     if (error) {
-  //       throw error;
-  //     }
+    if (error) {
+      throw error;
+    }
 
-  //     return data || [];
-  //   },
+    return data || [];
+  },
 
   async createColumn(
     supabase: SupabaseClient,
@@ -76,6 +96,21 @@ export const columnService = {
 
 // Combined Table Services
 export const boadDataService = {
+  async getBoardWithColumns(
+    supabase: SupabaseClient,
+    boardId: string
+  ) {
+    const [board , columns] = await Promise.all([
+      boardService.getBoard(supabase , boardId),
+      columnService.getColumns(supabase , boardId)
+    ])
+
+    if(!board) throw new Error("Board not found")
+
+      return {board , columns}
+
+  },
+
   async createBoardWithDefaultColumns(
     supabase: SupabaseClient,
     boardData: {
@@ -104,6 +139,7 @@ export const boadDataService = {
         columnService.createColumn(supabase, {
           ...column,
           board_id: board.id,
+          user_id: boardData.userId,
         })
       )
     );
