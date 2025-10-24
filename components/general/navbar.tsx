@@ -9,6 +9,7 @@ import {
 import {
   ArrowLeft,
   ArrowRightIcon,
+  Filter,
   MoreHorizontal,
   Trello,
 } from "lucide-react";
@@ -16,13 +17,21 @@ import React from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Badge } from "../ui/badge";
 
 interface Props {
   boardTitle?: string;
   onEditBoard?: () => void;
+  onFilterClick?: () => void;
+  filterCount?: number;
 }
 
-const Navbar = ({ boardTitle, onEditBoard }: Props) => {
+const Navbar = ({
+  boardTitle,
+  onEditBoard,
+  filterCount = 0,
+  onFilterClick,
+}: Props) => {
   const { user, isSignedIn } = useUser();
   const pathname = usePathname();
 
@@ -83,6 +92,32 @@ const Navbar = ({ boardTitle, onEditBoard }: Props) => {
                   </Button>
                 )}
               </div>
+            </div>
+
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+              {onFilterClick && (
+                <Button
+                  variant={"outline"}
+                  size={"sm"}
+                  className={`text-xs sm:text-sm ${
+                    filterCount > 0
+                      ? "bg-blue-100 border-blue-200"
+                      : ""
+                  }`}
+                  onClick={onFilterClick}
+                >
+                  <Filter className="size-3 sm:size-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Filter</span>
+                  {filterCount > 0 && (
+                    <Badge
+                      className="text-xs ml-1 sm:ml-2 bg-blue-100 border-blue-200"
+                      variant={"secondary"}
+                    >
+                      {filterCount}
+                    </Badge>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         </div>

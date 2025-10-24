@@ -67,21 +67,23 @@ export function useBoards() {
   return { boards, loading, error, createBoard };
 }
 
-export const useSingleBoard = (boardId : string) => {
- 
+export const useSingleBoard = (boardId: string) => {
   const { supabase } = useSupabase();
   const [board, setBoard] = useState<Board | null>(null);
   const [columns, setColumns] = useState<Column[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const loadBoard = useCallback(
     async function () {
       if (!boardId) return;
       try {
         setLoading(true);
         setError(null);
-        const data = await boadDataService.getBoardWithColumns(supabase!, boardId);
+        const data = await boadDataService.getBoardWithColumns(
+          supabase!,
+          boardId
+        );
         setBoard(data.board);
         setColumns(data.columns);
       } catch (error) {
@@ -97,11 +99,32 @@ export const useSingleBoard = (boardId : string) => {
     [supabase, boardId]
   );
 
+  const updateBoard = useCallback(
+    async function (boardId: string, updates: Partial<Board>) {
+      try {
+        const updatedBoard = await boardService.updateBoard(
+          supabase!,
+          boardId,
+          updates
+        );
+        setBoard(updatedBoard)
+        return updatedBoard
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to update the board"
+        );
+      }
+    },
+    [supabase]
+  );
+
   useEffect(() => {
     if (boardId) {
       loadBoard();
     }
   }, [boardId, loadBoard]);
 
-  return {board, columns , loading , error}
-}
+  return { board, columns, updateBoard, loading, error };
+};
